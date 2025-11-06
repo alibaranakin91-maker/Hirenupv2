@@ -19,7 +19,7 @@ Supabase şifreni bulmak için:
 DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.gyecknemhospwvhsicds.supabase.co:5432/postgres"
 
 # SONRA (Doğru - şifreni yaz):
-DATABASE_URL="postgresql://postgres:gerçek_şifren_buraya@db.gyecknemhospwvhsicds.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:2.MuhittinSupabase@db.gyecknemhospwvhsicds.supabase.co:5432/postgres"
 ```
 
 ## 🚀 Sonraki Adımlar:

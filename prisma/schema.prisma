@@ -163,9 +163,7 @@ model User {
 
   // Worker specific
   workerProfile WorkerProfile?
-  tasks         Task[]
   taskAssignments TaskAssignment[]
-  reports       Report[]
   reportAccess  ReportAccess[]
 
   // Employer specific
@@ -185,6 +183,10 @@ model User {
   // Permissions
   permissions    Permission[]
   sharedPermissions PermissionShare[]
+
+  // Task and Report relations
+  createdTasks   Task[] @relation("TaskCreator")
+  createdReports Report[] @relation("ReportCreator")
 }
 
 model Account {
@@ -405,6 +407,17 @@ model EntrepreneurProfile {
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   startups Startup[]
+}
+
+model EmployerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  bio         String?  @db.Text
+  companyName String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Startup {

@@ -155,7 +155,7 @@ model User {
 
   // Entrepreneur specific
   entrepreneurProfile EntrepreneurProfile?
-  startups           Startup[]
+  ownedStartups       Startup[] @relation("EntrepreneurStartups")
   startupMembers     StartupMember[]
   projects           Project[] @relation("EntrepreneurProjects")
   createdProjects    Project[] @relation("ProjectCreator")
@@ -269,7 +269,6 @@ model Company {
   joinRequests CompanyJoinRequest[]
   jobPostings JobPosting[]
   integrations CompanyIntegration[]
-  companyIntegrations Integration[]
   subscription CompanySubscription?
   advertisements Advertisement[]
   projects     Project[]
@@ -411,7 +410,6 @@ model EntrepreneurProfile {
   updatedAt   DateTime @updatedAt
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  startups Startup[] @relation("EntrepreneurStartups")
 }
 
 model EmployerProfile {
@@ -666,7 +664,7 @@ model Integration {
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   company     Company?          @relation("CompanyIntegrations", fields: [companyId], references: [id], onDelete: Cascade)
-  companyIntegrations CompanyIntegration[]
+  companyIntegrations CompanyIntegration[] @relation("IntegrationCompanyIntegrations")
 
   @@index([userId])
   @@index([companyId])
@@ -697,7 +695,7 @@ model CompanyIntegration {
   createdAt   DateTime @default(now())
 
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  integration Integration @relation("CompanyIntegrations", fields: [integrationId], references: [id], onDelete: Cascade)
+  integration Integration @relation("IntegrationCompanyIntegrations", fields: [integrationId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, integrationId])
 }

@@ -13,6 +13,10 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio"
   },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "dependencies": {
     "next": "^14.2.0",
     "react": "^18.3.0",
@@ -27,7 +31,11 @@
     "date-fns": "^3.3.1",
     "lucide-react": "^0.344.0",
     "clsx": "^2.1.0",
-    "tailwind-merge": "^2.2.1"
+    "tailwind-merge": "^2.2.1",
+    "bcryptjs": "^2.4.3",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.3",
+    "qrcode.react": "^3.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
@@ -38,7 +46,9 @@
     "postcss": "^8.4.35",
     "autoprefixer": "^10.4.18",
     "eslint": "^8.56.0",
-    "eslint-config-next": "^14.2.0"
+    "eslint-config-next": "^14.2.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/qrcode": "^1.5.5"
   }
 }
 

@@ -155,7 +155,7 @@ model User {
 
   // Entrepreneur specific
   entrepreneurProfile EntrepreneurProfile?
-  ownedStartups       Startup[] @relation("EntrepreneurStartups")
+  startups           Startup[] @relation("EntrepreneurStartups")
   startupMembers     StartupMember[]
   projects           Project[] @relation("EntrepreneurProjects")
   createdProjects    Project[] @relation("ProjectCreator")
@@ -269,6 +269,7 @@ model Company {
   joinRequests CompanyJoinRequest[]
   jobPostings JobPosting[]
   integrations CompanyIntegration[]
+  companyIntegrations Integration[] @relation("CompanyIntegrations")
   subscription CompanySubscription?
   advertisements Advertisement[]
   projects     Project[]
@@ -410,6 +411,7 @@ model EntrepreneurProfile {
   updatedAt   DateTime @updatedAt
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startups Startup[] @relation("EntrepreneurProfileStartups")
 }
 
 model EmployerProfile {
@@ -436,6 +438,8 @@ model Startup {
 
   entrepreneurId String
   entrepreneur   User   @relation("EntrepreneurStartups", fields: [entrepreneurId], references: [id], onDelete: Cascade)
+  entrepreneurProfileId String?
+  entrepreneurProfile EntrepreneurProfile? @relation("EntrepreneurProfileStartups", fields: [entrepreneurProfileId], references: [id], onDelete: Cascade)
 
   members     StartupMember[]
   reports     Report[]
@@ -664,7 +668,7 @@ model Integration {
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   company     Company?          @relation("CompanyIntegrations", fields: [companyId], references: [id], onDelete: Cascade)
-  companyIntegrations CompanyIntegration[] @relation("IntegrationCompanyIntegrations")
+  companyIntegrations CompanyIntegration[] @relation("CompanyIntegrationIntegration")
 
   @@index([userId])
   @@index([companyId])
@@ -695,7 +699,7 @@ model CompanyIntegration {
   createdAt   DateTime @default(now())
 
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  integration Integration @relation("IntegrationCompanyIntegrations", fields: [integrationId], references: [id], onDelete: Cascade)
+  integration Integration @relation("CompanyIntegrationIntegration", fields: [integrationId], references: [id], onDelete: Cascade)
 
   @@unique([companyId, integrationId])
 }

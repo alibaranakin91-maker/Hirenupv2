@@ -4,7 +4,7 @@
 
 ## 🔑 Önemli: Şifreyi Değiştir!
 
-`.env.local` dosyasını aç ve `[YOUR_PASSWORD]` kısmını Supabase şifresi ile değiştir.
+`.env.local` dosyasını aç ve `[2.MuhittinSupabase]` kısmını Supabase şifresi ile değiştir.
 
 Supabase şifreni bulmak için:
 1. https://supabase.com adresine git

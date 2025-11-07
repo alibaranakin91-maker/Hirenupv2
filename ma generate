@@ -1,0 +1,119 @@
+[33mcommit dc05e752f1e37104991dcb803527ef34413293de[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Fri Nov 7 16:48:35 2025 +0300
+
+    Update prisma client
+
+[33mcommit 95073a5426ba88d3c819af41780f044d45fdb642[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Fri Nov 7 16:00:22 2025 +0300
+
+    Test push
+
+[33mcommit e6667d376a5f8d1be26998114f9b9047efc06cd8[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Fri Nov 7 15:46:26 2025 +0300
+
+    Fix: Removed invalid context field for Prisma
+
+[33mcommit c96248ae9da8cac63516820217698fa4aa4d2b07[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Fri Nov 7 15:31:31 2025 +0300
+
+    Projenin son güncel hali
+
+[33mcommit 911fecac320692a2a9956929fb4a094731e42eeb[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Fri Nov 7 02:45:32 2025 +0300
+
+    Projenin son güncel hali
+
+[33mcommit 7e5316760b4dd279a7acb5df691b5800b626e14e[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:54:29 2025 +0300
+
+    Add Supabase database configuration
+
+[33mcommit a8fdd001dccfbb66aeb23218f8b93313ae2f5741[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:49:57 2025 +0300
+
+    Add Supabase database configuration
+
+[33mcommit c221abb6d762d799ebe8a6ef2619db1061c7cc08[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:20:45 2025 +0300
+
+    Fix: Fix all Prisma bidirectional relations
+
+[33mcommit 04b220dade6c7192f8a1acc30bd846c3c6ffd6e1[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:15:42 2025 +0300
+
+    Fix: Fix all Prisma bidirectional relations
+
+[33mcommit 7a471064771af19570ebc9b8cfddaf5d3e49f965[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:10:45 2025 +0300
+
+    Fix: Fix remaining Prisma relation errors
+
+[33mcommit 27073873ee2923950483ef9c9b6f7ca4e5f87d11[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:07:03 2025 +0300
+
+    Fix: Fix all Prisma relation errors
+
+[33mcommit 8468e4f4276a5328f377f4fe65d5de811a046b0f[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 23:01:58 2025 +0300
+
+    Fix: Remove vercel.json and add EmployerProfile model
+
+[33mcommit 19ddf371ede3c399a5cab7e428c13403f4a9caf0[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:59:38 2025 +0300
+
+    Fix: Add missing EmployerProfile model and fix Prisma schema
+
+[33mcommit 84a55887a53e2101460523576772ab6c8c08826b[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:49:49 2025 +0300
+
+    Fix: Add missing EmployerProfile model and fix Prisma schema
+
+[33mcommit d01348cf0f0d26ce72b55029422e945358feed7f[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:47:32 2025 +0300
+
+    Fix: Add missing EmployerProfile model and fix Prisma schema
+
+[33mcommit 7b5c3937aa116c91b7ca52c90172e70c6280e50b[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:44:38 2025 +0300
+
+    Fix: Add missing EmployerProfile model and fix Prisma schema
+
+[33mcommit 25405f3adb5f3ece281ff385234d70fc58951b3a[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:42:35 2025 +0300
+
+    Fix: Add missing dependencies and Vercel config
+
+[33mcommit fa51b8f9f301f3a8a5d38972edead32ddf99645c[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:32:57 2025 +0300
+
+    Initial commit - HireNUp project
+
+[33mcommit 4eddcb76cb4242296513b9ff386ad16f3cee0c00[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:23:45 2025 +0300
+
+    Initial commit - HireNUp project
+
+[33mcommit c88f3171b572ae6e3f1ed8434bf0d4a54ca9ebe3[m
+Author: Ali Baran AKIN <alibaranakin91@gmail.com>
+Date:   Thu Nov 6 22:16:13 2025 +0300
+
+    Initial commit - HireNUp project

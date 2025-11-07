@@ -753,3 +753,10 @@ model AIChat {
 
   @@index([userId])
 }
+model Project {
+  id        String  @id @default(cuid())
+  name      String
+  description String?
+  budget    Int?    // <-- burayı ekle
+  ...
+}

@@ -117,54 +117,61 @@ enum KYCStatus {
 }
 
 model User {
-  id               String           @id @default(cuid())
-  email            String           @unique
+  id               String      @id @default(cuid())
+  email            String      @unique
   name             String?
   image            String?
   emailVerified    DateTime?
   accountType      AccountType
   password         String?
-  twoFactorEnabled Boolean          @default(false)
+  twoFactorEnabled Boolean     @default(false)
   twoFactorSecret  String?
   twoFactorMethod  TwoFactorMethod?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
-  accounts             Account[]
-  sessions             Session[]
-  twoFactorBackupCodes TwoFactorBackupCode[]
-  kycVerification      KYCVerification?
-  profile              Profile?
-
-  companies           CompanyMember[]
-  companyJoinRequests CompanyJoinRequest[]
-
-  freelancerProfile   FreelancerProfile?
-  entrepreneurProfile EntrepreneurProfile?
-  workerProfile       WorkerProfile?
-  employerProfile     EmployerProfile?
-  investorProfile     InvestorProfile?
-
-  jobApplications JobApplication[]
-  jobPostings     JobPosting[]
-  projectsCreated Project[]        @relation("ProjectCreator")
-  tasksCreated    Task[]           @relation("TaskCreator")
-  reportsCreated  Report[]         @relation("ReportCreator")
-
-  aiChats            AIChat[]
-  integrations       Integration[]
-  permissions        Permission[]  @relation("PermissionUser")
-  grantedPermissions Permission[]  @relation("PermissionGranter")
-
-  ownedCompanies     Company[]           @relation("CompanyOwner")
-  commissions        Commission[]        @relation("FreelancerCommissions")
-  investments        Investment[]
-  investmentRequests InvestmentRequest[] @relation("InvestorRequests")
+  accounts                    Account[]
+  sessions                    Session[]
+  twoFactorBackupCodes        TwoFactorBackupCode[]
+  kycVerification             KYCVerification?
+  profile                     Profile?
+  companies                   CompanyMember[]
+  companyJoinRequests         CompanyJoinRequest[]
+  freelancerProfile           FreelancerProfile?
+  jobApplications             JobApplication[]
+  ratings                     Rating[]
+  badges                      UserBadge[]
+  commissions                 Commission[]              @relation("FreelancerCommissions")
+  entrepreneurProfile         EntrepreneurProfile?
+  startups                    Startup[]                 @relation("EntrepreneurStartups")
+  startupMembers              StartupMember[]
+  projects                    Project[]                 @relation("EntrepreneurProjects")
+  createdProjects             Project[]                 @relation("ProjectCreator")
+  aiChats                     AIChat[]
+  workerProfile               WorkerProfile?
+  taskAssignments             TaskAssignment[]
+  reportAccess                ReportAccess[]
+  employerProfile             EmployerProfile?
+  jobPostings                 JobPosting[]
+  ownedCompanies              Company[]                 @relation("CompanyOwner")
+  investorProfile             InvestorProfile?
+  investments                 Investment[]
+  investmentRequests          InvestmentRequest[]       @relation("InvestorRequests")
+  integrations                Integration[]
+  integrationRequests         IntegrationRequest[]
+  approvedIntegrationRequests IntegrationRequest[]      @relation("IntegrationApprover")
+  permissions                 Permission[]              @relation("PermissionUser")
+  grantedPermissions          Permission[]              @relation("PermissionGranter")
+  sharedPermissions           PermissionShare[]         @relation("PermissionShareUser")
+  sharedPermissionsAsSharer   PermissionShare[]         @relation("PermissionShareSharer")
+  createdTasks                Task[]                    @relation("TaskCreator")
+  createdReports              Report[]                  @relation("ReportCreator")
 }
 
 model Account {
   id                String  @id @default(cuid())
   userId            String
+  type              String
   provider          String
   providerAccountId String
   refresh_token     String? @db.Text
@@ -178,6 +185,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -185,7 +193,18 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
 }
 
 model TwoFactorBackupCode {
@@ -194,7 +213,10 @@ model TwoFactorBackupCode {
   code      String
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model KYCVerification {
@@ -208,7 +230,8 @@ model KYCVerification {
   rejectionReason String?   @db.Text
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
@@ -224,22 +247,36 @@ model Profile {
   availability String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Company {
-  id          String   @id @default(cuid())
-  name        String
-  description String?  @db.Text
-  ownerId     String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                        String                     @id @default(cuid())
+  name                      String
+  description               String?                    @db.Text
+  website                   String?
+  logo                      String?
+  industry                  String?
+  size                      String?
+  location                  String?
+  verificationStatus        CompanyVerificationStatus  @default(PENDING)
+  verificationDocuments     Json?
+  verificationNotes         String?                    @db.Text
+  verifiedAt                DateTime?
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  ownerId                   String
 
-  owner        User                 @relation("CompanyOwner", fields: [ownerId], references: [id])
-  members      CompanyMember[]
-  joinRequests CompanyJoinRequest[]
-  jobPostings  JobPosting[]
-  projects     Project[]
+  owner               User                  @relation("CompanyOwner", fields: [ownerId], references: [id])
+  members             CompanyMember[]
+  joinRequests        CompanyJoinRequest[]
+  jobPostings         JobPosting[]
+  integrations        CompanyIntegration[]
+  companyIntegrations Integration[]         @relation("CompanyIntegrations")
+  subscription        CompanySubscription?
+  advertisements      Advertisement[]
+  projects            Project[]
 }
 
 model CompanyMember {
@@ -248,8 +285,12 @@ model CompanyMember {
   userId    String
   role      UserRole @default(MEMBER)
   joinedAt  DateTime @default(now())
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([userId])
 }
 
 model CompanyJoinRequest {
@@ -257,137 +298,347 @@ model CompanyJoinRequest {
   companyId String
   userId    String
   status    CompanyJoinRequestStatus @default(PENDING)
-  message   String?
+  message   String?                  @db.Text
   createdAt DateTime                 @default(now())
   updatedAt DateTime                 @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@index([userId])
+}
+
+model CompanyIntegration {
+  id            String   @id @default(cuid())
+  companyId     String
+  integrationId String
+  createdAt     DateTime @default(now())
+
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, integrationId])
+}
+
+model Integration {
+  id           String            @id @default(cuid())
+  userId       String
+  companyId    String?
+  type         IntegrationType
+  status       IntegrationStatus @default(PENDING_APPROVAL)
+  accessToken  String?           @db.Text
+  refreshToken String?           @db.Text
+  metadata     Json?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company             Company?             @relation("CompanyIntegrations", fields: [companyId], references: [id], onDelete: Cascade)
+  companyIntegrations CompanyIntegration[]
+
+  @@index([userId])
+  @@index([companyId])
+}
+
+model IntegrationRequest {
+  id              String            @id @default(cuid())
+  userId          String
+  integrationType IntegrationType
+  status          IntegrationStatus @default(PENDING_APPROVAL)
+  requestData     Json?
+  approvedById    String?
+  approvedAt      DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user       User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approvedBy User? @relation("IntegrationApprover", fields: [approvedById], references: [id])
+
+  @@index([userId])
+  @@index([approvedById])
 }
 
 model FreelancerProfile {
   id         String   @id @default(cuid())
   userId     String   @unique
   title      String?
-  bio        String?
+  bio        String?  @db.Text
   skills     String[]
   hourlyRate Float?
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolio  Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EntrepreneurProfile {
   id        String   @id @default(cuid())
   userId    String   @unique
-  bio       String?
+  bio       String?  @db.Text
   expertise String[]
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startups Startup[] @relation("EntrepreneurProfileStartups")
 }
 
 model WorkerProfile {
-  id     String   @id @default(cuid())
-  userId String   @unique
-  bio    String?
-  skills String[]
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  bio       String?  @db.Text
+  skills    String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model EmployerProfile {
-  id          String  @id @default(cuid())
-  userId      String  @unique
+  id          String   @id @default(cuid())
+  userId      String   @unique
   companyName String?
-  bio         String?
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio         String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model InvestorProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
-  bio             String?
+  bio             String?  @db.Text
   investmentFocus String[]
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  portfolioSize   Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Startup {
+  id                    String   @id @default(cuid())
+  name                  String
+  description           String   @db.Text
+  industry              String?
+  stage                 String?
+  website               String?
+  logo                  String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  entrepreneurId        String
+  entrepreneurProfileId String?
+
+  entrepreneur        User                 @relation("EntrepreneurStartups", fields: [entrepreneurId], references: [id], onDelete: Cascade)
+  entrepreneurProfile EntrepreneurProfile? @relation("EntrepreneurProfileStartups", fields: [entrepreneurProfileId], references: [id], onDelete: Cascade)
+  members             StartupMember[]
+  reports             Report[]
+  investmentRequests  InvestmentRequest[]
+  projects            Project[]            @relation("StartupProjects")
+}
+
+model StartupMember {
+  id        String   @id @default(cuid())
+  startupId String
+  userId    String
+  role      String?
+  joinedAt  DateTime @default(now())
+
+  startup Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([startupId, userId])
+  @@index([userId])
 }
 
 model JobPosting {
-  id          String    @id @default(cuid())
-  title       String
-  description String
-  companyId   String
-  employerId  String
-  status      JobStatus @default(OPEN)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  title        String
+  description  String    @db.Text
+  companyId    String
+  employerId   String
+  status       JobStatus @default(OPEN)
+  location     String?
+  salary       String?
+  requirements String[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   employer     User             @relation(fields: [employerId], references: [id], onDelete: Cascade)
   applications JobApplication[]
+
+  @@index([companyId])
+  @@index([employerId])
 }
 
 model JobApplication {
   id          String   @id @default(cuid())
   jobId       String
   userId      String
-  coverLetter String?
+  coverLetter String?  @db.Text
+  resume      String?
   status      String   @default("pending")
   appliedAt   DateTime @default(now())
 
   job  JobPosting @relation(fields: [jobId], references: [id], onDelete: Cascade)
   user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId])
+  @@index([userId])
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  budget      Int?
-  industry    String?
-  status      String?
-  companyId   String?
-  creatorId   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String    @id @default(cuid())
+  name           String
+  description    String?   @db.Text
+  status         String?
+  startDate      DateTime?
+  endDate        DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  entrepreneurId String?
+  creatorId      String
+  startupId      String?
+  companyId      String?
 
-  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  creator User     @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  tasks   Task[]
-  reports Report[]
+  entrepreneur User?    @relation("EntrepreneurProjects", fields: [entrepreneurId], references: [id], onDelete: SetNull)
+  creator      User     @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  startup      Startup? @relation("StartupProjects", fields: [startupId], references: [id], onDelete: SetNull)
+  company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  tasks        Task[]
+  reports      Report[]
+
+  @@index([entrepreneurId])
+  @@index([creatorId])
+  @@index([startupId])
+  @@index([companyId])
 }
 
 model Task {
   id          String     @id @default(cuid())
   title       String
-  description String?
+  description String?    @db.Text
   status      TaskStatus @default(PENDING)
+  priority    String?
+  dueDate     DateTime?
   projectId   String?
   createdById String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  createdBy User     @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  project     Project?         @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy   User             @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignments TaskAssignment[]
+
+  @@index([projectId])
+  @@index([createdById])
+}
+
+model TaskAssignment {
+  id         String   @id @default(cuid())
+  taskId     String
+  userId     String
+  assignedAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([userId])
 }
 
 model Report {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   title       String
-  content     String
+  content     String       @db.Text
+  status      ReportStatus @default(DRAFT)
   projectId   String?
+  startupId   String?
   createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
-  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  createdBy User     @relation("ReportCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  project   Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  startup   Startup?       @relation(fields: [startupId], references: [id], onDelete: SetNull)
+  createdBy User           @relation("ReportCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  access    ReportAccess[]
+
+  @@index([projectId])
+  @@index([startupId])
+  @@index([createdById])
 }
 
-model Integration {
-  id        String            @id @default(cuid())
+model ReportAccess {
+  id        String   @id @default(cuid())
+  reportId  String
   userId    String
-  type      IntegrationType
-  status    IntegrationStatus @default(PENDING_APPROVAL)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  grantedAt DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reportId, userId])
+  @@index([userId])
+}
+
+model Investment {
+  id         String   @id @default(cuid())
+  amount     Float
+  date       DateTime @default(now())
+  investorId String
+  startupId  String
+  createdAt  DateTime @default(now())
+
+  investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
+
+  @@index([investorId])
+}
+
+model InvestmentRequest {
+  id         String   @id @default(cuid())
+  startupId  String
+  investorId String
+  amount     Float
+  equity     Float?
+  status     String   @default("pending")
+  message    String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  startup  Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  investor User    @relation("InvestorRequests", fields: [investorId], references: [id], onDelete: Cascade)
+
+  @@index([startupId])
+  @@index([investorId])
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?  @db.Text
+  userId    String
+  ratedBy   String
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model UserBadge {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeName   String
+  description String?
+  earnedAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Permission {
@@ -395,44 +646,90 @@ model Permission {
   type        PermissionType
   userId      String
   grantedById String
+  resourceId  String?
   createdAt   DateTime       @default(now())
+  expiresAt   DateTime?
 
-  user      User @relation("PermissionUser", fields: [userId], references: [id], onDelete: Cascade)
-  grantedBy User @relation("PermissionGranter", fields: [grantedById], references: [id], onDelete: Cascade)
+  user      User              @relation("PermissionUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User              @relation("PermissionGranter", fields: [grantedById], references: [id], onDelete: Cascade)
+  shares    PermissionShare[]
+
+  @@index([userId])
+  @@index([grantedById])
+}
+
+model PermissionShare {
+  id           String   @id @default(cuid())
+  permissionId String
+  sharedWith   String
+  sharedBy     String
+  createdAt    DateTime @default(now())
+
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  user       User       @relation("PermissionShareUser", fields: [sharedWith], references: [id], onDelete: Cascade)
+  sharer     User       @relation("PermissionShareSharer", fields: [sharedBy], references: [id], onDelete: Cascade)
+
+  @@unique([permissionId, sharedWith])
+  @@index([sharedWith])
+  @@index([sharedBy])
+}
+
+model CompanySubscription {
+  id        String           @id @default(cuid())
+  companyId String           @unique
+  plan      SubscriptionPlan
+  startDate DateTime         @default(now())
+  endDate   DateTime
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Advertisement {
+  id          String              @id @default(cuid())
+  companyId   String
+  title       String
+  content     String              @db.Text
+  targetUrl   String?
+  budget      Float
+  spent       Float               @default(0)
+  impressions Int                 @default(0)
+  clicks      Int                 @default(0)
+  status      AdvertisementStatus @default(DRAFT)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
 }
 
 model Commission {
-  id           String   @id @default(cuid())
+  id           String           @id @default(cuid())
   freelancerId String
   amount       Float
-  createdAt    DateTime @default(now())
-  freelancer   User     @relation("FreelancerCommissions", fields: [freelancerId], references: [id], onDelete: Cascade)
-}
+  description  String?          @db.Text
+  status       CommissionStatus @default(PENDING)
+  paidAt       DateTime?
+  createdAt    DateTime         @default(now())
 
-model Investment {
-  id         String   @id @default(cuid())
-  investorId String
-  createdAt  DateTime @default(now())
-  investor   User     @relation(fields: [investorId], references: [id], onDelete: Cascade)
-}
+  freelancer User @relation("FreelancerCommissions", fields: [freelancerId], references: [id], onDelete: Cascade)
 
-model InvestmentRequest {
-  id         String   @id @default(cuid())
-  investorId String
-  amount     Float
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  investor   User     @relation("InvestorRequests", fields: [investorId], references: [id], onDelete: Cascade)
+  @@index([freelancerId])
 }
 
 model AIChat {
-  id          String   @id @default(cuid())
-  message     String
-  messageType String
-  userId      String
-  projectId   String?
-  context     Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  messages  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

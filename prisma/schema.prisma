@@ -446,6 +446,7 @@ model Startup {
 
   members                 StartupMember[]
   reports                 Report[]
+  investments             Investment[]
   investmentRequests      InvestmentRequest[]
   projects                Project[] @relation("StartupProjects")
 }
@@ -608,8 +609,10 @@ model Investment {
   createdAt DateTime @default(now())
 
   investor User @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  startup  Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
 
   @@index([investorId])
+  @@index([startupId])
 }
 
 model InvestmentRequest {
@@ -738,7 +741,7 @@ model Commission {
 
 model AIChat {
   id          String   @id @default(cuid())
-  message     String   // <-- bunu ekle
+  message     String
   messageType String
   userId      String
   projectId   String?

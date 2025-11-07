@@ -500,17 +500,21 @@ model Project {
   endDate        DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  
   entrepreneurId String?
+  entrepreneur   User?    @relation("EntrepreneurProjects", fields: [entrepreneurId], references: [id], onDelete: SetNull)
+  
   creatorId      String
-  startupId      String?
-  companyId      String?
+  creator        User     @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
 
-  entrepreneur User?    @relation("EntrepreneurProjects", fields: [entrepreneurId], references: [id], onDelete: SetNull)
-  creator      User     @relation("ProjectCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  startup      Startup? @relation("StartupProjects", fields: [startupId], references: [id], onDelete: SetNull)
-  company      Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  tasks        Task[]
-  reports      Report[]
+  startupId      String?
+  startup        Startup? @relation("StartupProjects", fields: [startupId], references: [id], onDelete: SetNull)
+
+  companyId      String?
+  company        Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+
+  tasks          Task[]
+  reports        Report[]
 
   @@index([entrepreneurId])
   @@index([creatorId])

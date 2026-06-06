@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ContactStatus {
+  NEW
+  CONTACTED
+  INTERESTED
+  NOT_INTERESTED
+  APPOINTMENT_SET
+  FOLLOW_UP
+  SALE_CLOSED
+  LOST
+}
+
+enum CallStatus {
+  QUEUED
+  RINGING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  NO_ANSWER
+  BUSY
+  CANCELLED
+}
+
+enum CallDirection {
+  OUTBOUND
+  INBOUND
+}
+
+enum CallOutcome {
+  APPOINTMENT_SET
+  CALLBACK_REQUESTED
+  INTERESTED
+  NOT_INTERESTED
+  VOICEMAIL
+  NO_ANSWER
+  SALE_CLOSED
+  INFO_SENT
+  FOLLOW_UP_NEEDED
+  OTHER
+}
+
+enum CrmNoteType {
+  CALL_SUMMARY
+  STATUS_CHANGE
+  APPOINTMENT
+  FOLLOW_UP
+  GENERAL
+  SALE
+  OBJECTION
+  FEEDBACK
+}
+
+model Contact {
+  id          String        @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  company     String?
+  title       String?
+  status      ContactStatus @default(NEW)
+  tags        String[]
+  notes       String?       @db.Text
+  metadata    Json?
+  lastCalledAt DateTime?
+  calls       Call[]
+  crmNotes    CrmNote[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+  @@index([phone])
+}
+
+model Call {
+  id              String        @id @default(cuid())
+  contactId       String
+  twilioCallSid   String?       @unique
+  status          CallStatus    @default(QUEUED)
+  direction       CallDirection @default(OUTBOUND)
+  duration        Int?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  transcript      Json?
+  summary         String?       @db.Text
+  sentiment       String?
+  outcome         CallOutcome?
+  agentConfigId   String?
+  recordingUrl    String?
+  notes           String?       @db.Text
+  contact         Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  agentConfig     AgentConfig?  @relation(fields: [agentConfigId], references: [id])
+  crmNotes        CrmNote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([contactId])
+  @@index([status])
+  @@index([twilioCallSid])
+}
+
+model CrmNote {
+  id          String      @id @default(cuid())
+  contactId   String
+  callId      String?
+  type        CrmNoteType @default(GENERAL)
+  content     String      @db.Text
+  status      String?
+  contact     Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  call        Call?       @relation(fields: [callId], references: [id], onDelete: SetNull)
+  createdAt   DateTime    @default(now())
+
+  @@index([contactId])
+  @@index([callId])
+  @@index([type])
+}
+
+model Memory {
+  id        String   @id @default(cuid())
+  category  String
+  key       String
+  content   String   @db.Text
+  priority  Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([category, key])
+  @@index([category])
+  @@index([isActive])
+}
+
+model AgentConfig {
+  id                String   @id @default(cuid())
+  name              String
+  personality       String?  @db.Text
+  greeting          String?  @db.Text
+  objective         String?  @db.Text
+  instructions      String?  @db.Text
+  fallbackResponse  String?  @db.Text
+  voiceId           String?  @default("alloy")
+  language          String   @default("tr-TR")
+  maxCallDuration   Int      @default(300)
+  isActive          Boolean  @default(true)
+  calls             Call[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CrmWebhook {
+  id          String   @id @default(cuid())
+  url         String
+  events      String[]
+  secret      String?
+  isActive    Boolean  @default(true)
+  lastTriggered DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
